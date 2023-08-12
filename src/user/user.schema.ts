@@ -18,7 +18,7 @@ export class User {
   password: string;
 
   @Prop({
-    type: String,
+    type: [String],
     enum: ['admin', 'user', 'groupAdmin'],
     default: ['user'], // Set the default role to 'user'
     required: true,
