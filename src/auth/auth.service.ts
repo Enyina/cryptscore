@@ -49,10 +49,13 @@ export class AuthService {
 
   async signToken(userId) {
     const secret = this.congif.get('JWT_SECRET');
-    return await this.jwt.sign(userId, {
-      expiresIn: '30d',
-      secret: secret,
-    });
+    return await this.jwt.sign(
+      { userId },
+      {
+        expiresIn: '30d',
+        secret: secret,
+      },
+    );
   }
 
   // Implement  forgotPassword, and resetPassword methods here
