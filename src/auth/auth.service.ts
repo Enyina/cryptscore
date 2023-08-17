@@ -20,23 +20,29 @@ export class AuthService {
   ) {}
 
   async register(dto: createUserDto) {
+    const users = await this.User.find();
+    if (users.length === 0) {
+      const pass = await bcrypt.hash('password', 12);
+      await this.User.create({
+        name: 'admin',
+        number: '08061313069',
+        email: 'admin@gmail.com',
+        password: pass,
+      });
+    }
     dto.password = await bcrypt.hash(dto.password, 12);
     const createdUser = await this.User.create(dto);
     if (!createdUser) {
       throw new NotFoundException('Unable to create user.');
     }
     createdUser.password = undefined;
-    const users = await this.User.find();
-    if (users.length === 1 && users[0].email === createdUser.email) {
-      createdUser.role = ['admin'];
-    }
     const token = await this.signToken(createdUser.id);
 
     return { createdUser, token };
   }
 
   async login(dto: loginDto) {
-    const user = await this.User.findOne({ name: dto.email });
+    const user = await this.User.findOne({ email: dto.email });
     if (!user || !(await bcrypt.compare(dto.password, user.password))) {
       throw new UnauthorizedException('Invalid credentials');
     }
