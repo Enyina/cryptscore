@@ -41,7 +41,7 @@ export class UserService {
     }
   }
 
-  async addRoleToUser(userId: string, role: string) {
+  async updateUserRoles(userId: string, role: string) {
     try {
       const user = await this.getUserById(userId);
       // Push the new role into the roles array
