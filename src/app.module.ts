@@ -7,6 +7,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GroupModule } from './group/group.module';
 import { PredictionModule } from './prediction/prediction.module';
+// import { DataBaseModule } from './data-base/data-base.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { PredictionModule } from './prediction/prediction.module';
     UserModule,
     GroupModule,
     PredictionModule,
+    // DataBaseModule,
   ],
   controllers: [AppController],
   providers: [AppService],

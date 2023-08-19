@@ -10,6 +10,19 @@ export class Group {
   @Prop({ required: true })
   name: string;
 
+  @Prop({
+    type: String,
+    enum: ['public', 'private'],
+    default: 'public', // Set the default role to 'user'
+    required: true,
+  })
+  groupType: string;
+  @Prop({
+    type: String,
+    required: true,
+  })
+  league: string;
+
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true })
   admin: string; // Reference to the admin user
 

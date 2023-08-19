@@ -2,14 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { Group, GroupDocument } from './group.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { UserService } from 'src/user/user.service';
 import { CreateGroupDto } from './dto';
 
 @Injectable()
 export class GroupService {
   constructor(
     @InjectModel(Group.name) private groupModel: Model<GroupDocument>,
-    private readonly userService: UserService,
   ) {}
 
   async createGroup(userId, dto: CreateGroupDto): Promise<Group> {
@@ -18,7 +16,6 @@ export class GroupService {
         name: dto.name,
         admin: userId,
       });
-      await this.userService.updateUserRoles(userId, 'groupAdmin');
       return newGroup;
     } catch (error) {
       console.log(error);
