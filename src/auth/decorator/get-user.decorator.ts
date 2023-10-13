@@ -10,7 +10,7 @@ export const GetUser = createParamDecorator(
     if (request.headers.authorization) {
       const [_, token] = request.headers.authorization.split(' ');
       const user = jwt.decode(token);
-      return user['userid'];
+      return user['userId'];
     }
 
     return null;

@@ -21,8 +21,6 @@ export class Group {
     type: String,
     required: true,
   })
-  league: string;
-
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true })
   admin: string; // Reference to the admin user
 
@@ -34,7 +32,10 @@ export class Group {
 
   @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Prediction' }] })
   wrongPredictions: Prediction[];
-  // Define other group properties as needed
+  @Prop({
+    required: true,
+  })
+  isPublic: boolean; // Use an array to store multiple roles
 }
 
 export const GroupSchema = SchemaFactory.createForClass(Group);

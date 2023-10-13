@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { User, UserDocument } from './user.schema';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { updateUserDto } from './dto';
+import { updateUserDto, updateUserPasswordDto } from './dto';
 
 @Injectable()
 export class UserService {
@@ -11,6 +11,20 @@ export class UserService {
   async updateUser(userId: string, updatedUser: updateUserDto) {
     try {
       return this.User.findByIdAndUpdate(userId, updatedUser, { new: true });
+    } catch (error) {
+      console.error('Error updating user:', error.message);
+    }
+  }
+  async updatePassword(userId: string, updatedUser: updateUserPasswordDto) {
+    try {
+      const user = await this.User.findById(userId);
+      if (user.password === updatedUser.oldPassword) {
+        return this.User.findByIdAndUpdate(
+          userId,
+          { password: updatedUser.password },
+          { new: true },
+        );
+      }
     } catch (error) {
       console.error('Error updating user:', error.message);
     }
@@ -35,7 +49,18 @@ export class UserService {
 
   async getAllUsers(): Promise<User[]> {
     try {
-      return this.User.find().exec();
+      return await this.User.find().exec();
+    } catch (error) {
+      console.error('Error getting users:', error.message);
+    }
+  }
+  async getAllUserGroups(userId) {
+    try {
+      const user = await this.User.findById(userId);
+      if (!user) {
+        throw new BadRequestException('User not found');
+      }
+      return user.groups;
     } catch (error) {
       console.error('Error getting users:', error.message);
     }

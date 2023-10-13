@@ -18,6 +18,15 @@ export class User {
   @Prop({ required: true })
   password: string;
 
+  @Prop({ required: true })
+  points: string;
+
+  @Prop({ maxlength: 10 })
+  accNumber: string;
+
+  @Prop({ required: false })
+  accName: string;
+
   @Prop({
     type: [String],
     enum: ['admin', 'user'],
@@ -28,6 +37,9 @@ export class User {
 
   @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Group' }] })
   groups: Group[];
+
+  @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Prediction' }] })
+  predictions: Group[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

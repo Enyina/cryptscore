@@ -14,6 +14,18 @@ export class Prediction {
   group: Group;
 
   @Prop({ required: true })
+  match: string;
+
+  @Prop({ required: true })
+  matchTime: string;
+
+  @Prop({ required: true })
+  matchStatus: string;
+
+  @Prop({ required: true })
+  prediction: string;
+
+  @Prop({ required: true })
   isCorrect: boolean;
 }
 
