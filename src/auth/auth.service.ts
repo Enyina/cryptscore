@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -33,7 +34,7 @@ export class AuthService {
     dto.password = await bcrypt.hash(dto.password, 12);
     const createdUser = await this.User.create(dto);
     if (!createdUser) {
-      throw new NotFoundException('Unable to create user.');
+      throw new BadRequestException('Unable to create user.');
     }
     createdUser.password = undefined;
     const token = await this.signToken(createdUser.id);
@@ -55,6 +56,8 @@ export class AuthService {
 
   async signToken(userId) {
     const secret = this.congif.get('JWT_SECRET');
+    console.log('signing token:', secret);
+
     return await this.jwt.sign(
       { userId },
       {

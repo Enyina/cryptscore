@@ -20,36 +20,41 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Put('/:id')
-  updateUser(@Param('id') id: string, @Body() dto: updateUserDto) {
-    return this.userService.updateUser(id, dto);
+  async updateUser(@Param('id') id: string, @Body() dto: updateUserDto) {
+    return await this.userService.updateUser(id, dto);
   }
   @Patch('/:id')
-  updatePassword(@Param('id') id: string, @Body() dto: updateUserPasswordDto) {
-    return this.userService.updatePassword(id, dto);
+  async updatePassword(
+    @Param('id') id: string,
+    @Body() dto: updateUserPasswordDto,
+  ) {
+    console.log(id);
+
+    return await this.userService.updatePassword(id, dto);
   }
 
   @Delete('/:id')
   @Roles('ADMIN')
   @UseGuards(RoleGuard)
-  deleteUser(@Param('id') id: string) {
-    return this.userService.deleteUser(id);
+  async deleteUser(@Param('id') id: string) {
+    return await this.userService.deleteUser(id);
   }
 
   @Get('/:id')
-  getUserById(@Param('id') id: string) {
-    return this.userService.getUserById(id);
+  async getUserById(@Param('id') id: string) {
+    return await this.userService.getUserById(id);
   }
 
   @Get()
   @Roles('ADMIN')
   @UseGuards(RoleGuard)
-  getAllUsers(): Promise<User[]> {
-    return this.userService.getAllUsers();
+  async getAllUsers(): Promise<User[]> {
+    return await this.userService.getAllUsers();
   }
-  @Get('/:userId')
+  @Get('get-groups/:userId')
   @Roles('ADMIN')
   @UseGuards(RoleGuard)
-  getAllUserGroups(@Param('id') userId: string) {
-    return this.userService.getAllUserGroups(userId);
+  async getAllUserGroups(@Param('id') userId: string) {
+    return await this.userService.getAllUserGroups(userId);
   }
 }

@@ -1,7 +1,12 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { User, UserDocument } from './user.schema';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
+import * as bcrypt from 'bcrypt';
 import { updateUserDto, updateUserPasswordDto } from './dto';
 
 @Injectable()
@@ -16,18 +21,26 @@ export class UserService {
     }
   }
   async updatePassword(userId: string, updatedUser: updateUserPasswordDto) {
-    try {
-      const user = await this.User.findById(userId);
-      if (user.password === updatedUser.oldPassword) {
-        return this.User.findByIdAndUpdate(
-          userId,
-          { password: updatedUser.password },
-          { new: true },
-        );
-      }
-    } catch (error) {
-      console.error('Error updating user:', error.message);
+    // try {
+    const user = await this.User.findById(userId);
+    console.log(updatedUser.oldPassword, user.password);
+    console.log(user);
+    if (
+      !user ||
+      !(await bcrypt.compare(updatedUser.oldPassword, user.password))
+    ) {
+      throw new UnauthorizedException('Invalid password');
     }
+
+    user.password = await bcrypt.hash(updatedUser.password, 12);
+    return await this.User.findByIdAndUpdate(
+      userId,
+      { password: user.password },
+      { new: true },
+    );
+    // } catch (error) {
+    //   console.error('Error updating user:', error.message);
+    // }
   }
 
   async deleteUser(userId: string) {
