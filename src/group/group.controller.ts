@@ -18,7 +18,7 @@ import { JwtGuard, RoleGuard } from 'src/auth/guard';
 export class GroupController {
   constructor(private readonly groupService: GroupService) {}
 
-  @Post()
+  @Post('/create')
   async createGroup(
     @GetUser() userId: string,
     @Body() createGroupDto: CreateGroupDto,
@@ -35,9 +35,15 @@ export class GroupController {
     return group;
   }
 
-  @Get('/:groupId')
+  @Get('/:groupId/users')
   async getAllGroupUsers(@Param() dto: { groupId: string }) {
     const group = await this.groupService.getGroupUsers(dto.groupId);
+
+    return group;
+  }
+  @Get('/:groupId')
+  async getGroup(@Param() dto: { groupId: string }) {
+    const group = await this.groupService.getGroup(dto.groupId);
 
     return group;
   }

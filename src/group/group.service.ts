@@ -15,6 +15,7 @@ export class GroupService {
       const newGroup = await this.groupModel.create({
         name: dto.name,
         admin: userId,
+        members: [userId],
       });
       return newGroup;
     } catch (error) {
@@ -24,6 +25,14 @@ export class GroupService {
   async getGroups() {
     try {
       const groups = await this.groupModel.find();
+      return groups;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  async getGroup(groupId) {
+    try {
+      const groups = await this.groupModel.findById(groupId);
       return groups;
     } catch (error) {
       console.log(error);
