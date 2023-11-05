@@ -24,7 +24,7 @@ export class GroupController {
     @Body() createGroupDto: CreateGroupDto,
   ) {
     const group = await this.groupService.createGroup(userId, createGroupDto);
-
+    console.log(group);
     return group;
   }
   @Get()

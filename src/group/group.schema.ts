@@ -32,8 +32,10 @@ export class Group {
 
   @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Prediction' }] })
   wrongPredictions: Prediction[];
+
   @Prop({
     required: true,
+    default: true,
   })
   isPublic: boolean; // Use an array to store multiple roles
 }
