@@ -63,6 +63,20 @@ export class GroupController {
   ) {
     return this.groupService.leaveGroup(groupId, userId);
   }
+
+  @Post('/get-invites')
+  async getInvites(@Body() dto: { groupId: string }) {
+    return this.groupService.getInvites(dto.groupId);
+  }
+  @Post('/accept-invite')
+  async acceptInvite(@Body() dto: { inviteId: string }) {
+    return this.groupService.acceptInvites(dto.inviteId);
+  }
+  @Post('/reject-invite')
+  async rejectInvite(@Body() dto: { inviteId: string }) {
+    return this.groupService.rejectInvites(dto.inviteId);
+  }
+
   @Get(':userId/groups')
   @Roles('ADMIN')
   @UseGuards(RoleGuard)

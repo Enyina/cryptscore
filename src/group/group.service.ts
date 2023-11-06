@@ -3,11 +3,13 @@ import { Group, GroupDocument } from './group.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateGroupDto } from './dto';
+import { Invite, InviteDocument } from './invite.schema ';
 
 @Injectable()
 export class GroupService {
   constructor(
     @InjectModel(Group.name) private groupModel: Model<GroupDocument>,
+    @InjectModel(Invite.name) private invite: Model<InviteDocument>,
   ) {}
 
   async createGroup(userId, dto: CreateGroupDto): Promise<Group> {
@@ -62,13 +64,56 @@ export class GroupService {
     }
   }
 
-  async joinGroup(groupId: string, userId: string): Promise<Group> {
+  async joinGroup(groupId: string, userId: string) {
     try {
-      return this.groupModel.findByIdAndUpdate(
+      const group = await this.groupModel.findById(groupId);
+      if (group.isPublic) {
+        await this.invite.create({
+          sender: userId,
+          reciever: groupId,
+        });
+        return 'Invite sent successfully';
+      }
+      return await this.groupModel.findByIdAndUpdate(
         groupId,
         { $addToSet: { members: userId } },
         { new: true },
       );
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  async getInvites(groupId: string) {
+    try {
+      const invites = await this.invite.find({
+        reciever: groupId,
+      });
+      if (!invites) {
+        return 'no invites found';
+      }
+      return invites;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  async acceptInvites(inviteId: string) {
+    try {
+      const invite = await this.invite.findById({ id: inviteId });
+      await this.invite.deleteOne({ id: inviteId });
+      return await this.groupModel.findByIdAndUpdate(
+        invite.reciever,
+        { $addToSet: { members: invite.sender } },
+        { new: true },
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async rejectInvites(inviteId: string) {
+    try {
+      await this.invite.deleteOne({ id: inviteId });
+      return 'invite rejected';
     } catch (error) {
       console.log(error);
     }
