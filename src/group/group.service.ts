@@ -34,7 +34,9 @@ export class GroupService {
   }
   async getGroup(groupId) {
     try {
-      const groups = await this.groupModel.findById(groupId);
+      const groups = await this.groupModel
+        .findById(groupId)
+        .populate('members');
       return groups;
     } catch (error) {
       console.log(error);
