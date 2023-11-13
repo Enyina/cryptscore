@@ -69,10 +69,12 @@ export class UserService {
   }
   async getAllUserGroups(userId) {
     try {
+      console.log(userId);
       const user = await this.User.findById(userId);
       if (!user) {
         throw new BadRequestException('User not found');
       }
+
       return user.groups;
     } catch (error) {
       console.error('Error getting users:', error.message);

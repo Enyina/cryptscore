@@ -69,7 +69,7 @@ export class GroupService {
   async joinGroup(groupId: string, userId: string) {
     try {
       const group = await this.groupModel.findById(groupId);
-      if (group.isPublic) {
+      if (!group.isPublic) {
         await this.invite.create({
           sender: userId,
           reciever: groupId,

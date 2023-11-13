@@ -52,9 +52,9 @@ export class UserController {
     return await this.userService.getAllUsers();
   }
   @Get('get-groups/:userId')
-  @Roles('ADMIN')
-  @UseGuards(RoleGuard)
-  async getAllUserGroups(@Param('id') userId: string) {
-    return await this.userService.getAllUserGroups(userId);
+  // @Roles('ADMIN')
+  // @UseGuards(RoleGuard)
+  async getAllUserGroups(@Param() params: { userId: string }) {
+    return await this.userService.getAllUserGroups(params.userId);
   }
 }
