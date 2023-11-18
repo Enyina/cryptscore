@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
-import { Group } from 'src/group/group.schema';
+import { Group, GroupDocument } from 'src/group/group.schema';
 
 export type UserDocument = User & Document;
 
@@ -36,10 +36,10 @@ export class User {
   role: string[]; // Use an array to store multiple roles
 
   @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Group' }] })
-  groups: Group[];
+  groups: GroupDocument[];
 
   @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Prediction' }] })
-  predictions: Group[];
+  predictions: GroupDocument[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
