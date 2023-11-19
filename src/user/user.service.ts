@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { User, UserDocument } from './user.schema';
@@ -70,10 +71,12 @@ export class UserService {
   async getAllUserGroups(userId) {
     try {
       console.log(userId);
-      const user = await this.User.findById(userId);
+      const user = await this.User.findById(userId).populate('groups').exec();
       if (!user) {
-        throw new BadRequestException('User not found');
+        throw new NotFoundException('User not found');
       }
+
+      console.log({ user });
 
       return user.groups;
     } catch (error) {

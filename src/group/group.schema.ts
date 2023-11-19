@@ -37,7 +37,7 @@ export class Group {
     required: true,
     default: true,
   })
-  isPublic: boolean; // Use an array to store multiple roles
+  isPublic: boolean;
 }
 
 export const GroupSchema = SchemaFactory.createForClass(Group);

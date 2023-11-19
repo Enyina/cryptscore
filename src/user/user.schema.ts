@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 import { Group, GroupDocument } from 'src/group/group.schema';
+import { PredictionDocument } from 'src/prediction/prediction.schema';
 
 export type UserDocument = User & Document;
 
@@ -39,7 +40,7 @@ export class User {
   groups: GroupDocument[];
 
   @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Prediction' }] })
-  predictions: GroupDocument[];
+  predictions: PredictionDocument[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

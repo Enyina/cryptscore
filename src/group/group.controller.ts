@@ -78,7 +78,7 @@ export class GroupController {
   }
 
   @Get(':userId/groups')
-  @Roles('ADMIN')
+  // @Roles('ADMIN')
   @UseGuards(RoleGuard)
   getAllUserGroups(@Param() param: { userId: string }) {
     return this.groupService.getAllUserGroups(param.userId);
