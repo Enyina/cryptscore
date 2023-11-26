@@ -18,6 +18,7 @@ export class GroupService {
         name: dto.name,
         admin: userId,
         members: [userId],
+        isPublic: dto.isPublic,
       });
       return newGroup;
     } catch (error) {
@@ -123,13 +124,14 @@ export class GroupService {
 
   async leaveGroup(groupId: string, userId: string): Promise<Group> {
     try {
-      return this.groupModel.findByIdAndUpdate(
+      return await this.groupModel.findByIdAndUpdate(
         groupId,
         { $pull: { members: userId } },
         { new: true },
       );
     } catch (error) {
-      console.log(error);
+      console.log('Error leaving group:', error.message);
+      throw new Error('Failed to leave group');
     }
   }
 }
