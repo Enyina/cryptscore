@@ -7,6 +7,8 @@ import {
   Delete,
   Patch,
   UseGuards,
+  Post,
+  Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './user.schema';
@@ -56,5 +58,34 @@ export class UserController {
   // @UseGuards(RoleGuard)
   async getAllUserGroups(@Param() params: { userId: string }) {
     return await this.userService.getAllUserGroups(params.userId);
+  }
+
+  @Get(':id/predicted-matches/count')
+  async getUserPredictedMatchesCount(@Param('id') userId: string) {
+    const predictions = await this.userService.getUserPredictedMatches(userId);
+    return { predictions };
+  }
+
+  @Post(':id/predicted-matches/correct')
+  async updatePointsOnCorrectPrediction(
+    @Param('id') userId: string,
+  ): Promise<void> {
+    await this.userService.updatePointsOnCorrectPrediction(userId);
+  }
+
+  @Get(':id/points')
+  async getUserPoints(
+    @Param('id') userId: string,
+  ): Promise<{ points: number }> {
+    return this.userService.getUserPoints(userId);
+  }
+
+  @Get('/prediction-board')
+  async getUsersByPoints(
+    @Query('page') page = 1,
+    @Query('pageSize') pageSize = 10,
+  ) {
+    const usersList = await this.userService.getUsersByPoints(page, pageSize);
+    return { success: true, data: usersList };
   }
 }

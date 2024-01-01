@@ -83,4 +83,10 @@ export class GroupController {
   getAllUserGroups(@Param() param: { userId: string }) {
     return this.groupService.getAllUserGroups(param.userId);
   }
+
+  @Get('prediction-board')
+  async getTopGroupsByTotalPoints() {
+    const groupsList = await this.groupService.getTopGroupsByTotalPoints();
+    return { success: true, data: groupsList };
+  }
 }

@@ -6,7 +6,7 @@ import { PredictionDocument } from 'src/prediction/prediction.schema';
 export type UserDocument = User & Document;
 
 @Schema()
-export class User {
+export class User extends Document {
   @Prop({ required: true })
   name: string;
 
@@ -19,14 +19,14 @@ export class User {
   @Prop({ required: true })
   password: string;
 
-  @Prop({ required: false })
-  points: string;
-
   @Prop({ maxlength: 10 })
   accNumber: string;
 
   @Prop({ required: false })
   accName: string;
+
+  @Prop({ required: true, default: 0 })
+  points: number;
 
   @Prop({
     type: [String],

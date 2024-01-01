@@ -98,4 +98,48 @@ export class UserService {
       console.error('Error adding role to the user:', error.message);
     }
   }
+
+  async getUserPredictedMatches(userId: string) {
+    const user = await this.User.findById(userId).populate('predictions');
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    return user.predictions;
+  }
+
+  async updatePointsOnCorrectPrediction(userId: string): Promise<void> {
+    const user = await this.User.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Assuming you have a field named 'points' in your user schema
+    user.points = (user.points || 0) + 1;
+
+    await user.save();
+  }
+
+  async getUserPoints(userId: string): Promise<{ points: number }> {
+    const user = await this.User.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return { points: user.points || 0 };
+  }
+
+  async getUsersByPoints(page: number, pageSize: number): Promise<User[]> {
+    const usersList = await this.User.find(
+      {},
+      { username: 1, email: 1, points: 1 },
+    )
+      .sort({ points: -1 })
+      .skip((page - 1) * pageSize)
+      .limit(pageSize)
+      .exec();
+
+    return usersList;
+  }
 }

@@ -134,4 +134,21 @@ export class GroupService {
       throw new Error('Failed to leave group');
     }
   }
+
+  async getTopGroupsByTotalPoints(): Promise<Group[]> {
+    const groupsList = await this.groupModel
+      .aggregate([
+        {
+          $project: {
+            name: 1,
+            totalPoints: { $sum: '$members.points' },
+          },
+        },
+        { $sort: { totalPoints: -1 } },
+        { $limit: 10 },
+      ])
+      .exec();
+
+    return groupsList;
+  }
 }

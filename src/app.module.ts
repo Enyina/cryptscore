@@ -8,6 +8,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GroupModule } from './group/group.module';
 import { PredictionModule } from './prediction/prediction.module';
 // import { DataBaseModule } from './data-base/data-base.module';
+import { MatchModule } from './match/match.module';
+// import { MatchNoSpecController } from './match--no-spec/match--no-spec.controller';
+import { AdminModule } from './admin/admin.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -22,6 +26,9 @@ import { PredictionModule } from './prediction/prediction.module';
     UserModule,
     GroupModule,
     PredictionModule,
+    MatchModule,
+    AdminModule,
+    NotificationModule,
     // DataBaseModule,
   ],
   controllers: [AppController],
