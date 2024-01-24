@@ -47,7 +47,7 @@ export class UserController {
     return await this.userService.getUserById(id);
   }
 
-  @Get()
+  @Get('/users')
   @Roles('ADMIN')
   @UseGuards(RoleGuard)
   async getAllUsers(): Promise<User[]> {

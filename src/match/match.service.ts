@@ -19,6 +19,14 @@ export class MatchService {
     return createdMatch;
   }
 
+  async findById(id: string): Promise<Match | null> {
+    return this.matchModel.findById(id).exec();
+  }
+
+  async findAll(): Promise<Match[]> {
+    return this.matchModel.find().exec();
+  }
+
   async updateMatch(
     matchId: string,
     updateMatchDto: UpdateMatchDto,

@@ -36,10 +36,10 @@ export class User extends Document {
   })
   role: string[]; // Use an array to store multiple roles
 
-  @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Group' }] })
+  @Prop([{ type: MongooseSchema.Types.ObjectId, ref: 'Group' }])
   groups: GroupDocument[];
 
-  @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Prediction' }] })
+  @Prop([{ type: MongooseSchema.Types.ObjectId, ref: 'Prediction' }])
   predictions: PredictionDocument[];
 }
 

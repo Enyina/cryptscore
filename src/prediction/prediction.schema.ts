@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 import { UserDocument } from '../user/user.schema';
 import { GroupDocument } from 'src/group/group.schema';
+import { MatchDocument } from 'src/match/match.schema';
 
 export type PredictionDocument = Prediction & Document;
 
@@ -14,7 +15,7 @@ export class Prediction {
   group: GroupDocument;
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Match', required: 'true' })
-  match: string;
+  match: MatchDocument;
 
   @Prop({ required: true, enum: ['TEAM_A', 'TEAM_B', 'DRAW'] })
   predictedWinner: string;

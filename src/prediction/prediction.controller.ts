@@ -1,6 +1,23 @@
-import { Controller, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { JwtGuard } from 'src/auth/guard';
+import { PredictionService } from './prediction.service';
+import { CreatePrediction } from './dto';
 
 @Controller('prediction')
-@UseGuards(JwtGuard)
-export class PredictionController {}
+// @UseGuards(JwtGuard)
+export class PredictionController {
+  constructor(private readonly predictionService: PredictionService) {}
+
+  @Post('/create')
+  async predict(@Body() dto: CreatePrediction) {
+    return this.predictionService.createPrediction(dto);
+  }
+
+  @Get(':id/predicted-matches/count')
+  async getUserPredictedMatchesCount(@Param('id') userId: string) {
+    const predictions = await this.predictionService.getUserPredictedMatches(
+      userId,
+    );
+    return { predictions };
+  }
+}

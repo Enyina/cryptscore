@@ -130,15 +130,10 @@ export class UserService {
     return { points: user.points || 0 };
   }
 
-  async getUsersByPoints(page: number, pageSize: number): Promise<User[]> {
-    const usersList = await this.User.find(
-      {},
-      { username: 1, email: 1, points: 1 },
-    )
-      .sort({ points: -1 })
-      .skip((page - 1) * pageSize)
-      .limit(pageSize)
-      .exec();
+  async getUsersByPoints(page: number, pageSize: number) {
+    const usersList = await this.User.find({});
+    // .skip((page - 1) * pageSize)
+    // .limit(pageSize)
 
     return usersList;
   }
