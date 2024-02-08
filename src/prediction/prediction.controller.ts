@@ -20,4 +20,15 @@ export class PredictionController {
     );
     return { predictions };
   }
+  // @Get('/:userId/user-predictions/:predictionId')
+  // async getUserPredictedMatchesCount(
+  //   @Param('userId') userId: string,
+  //   @Param('predictionId') predictionId: string,
+  // ) {
+  //   const predictions = await this.predictionService.getUserPredictions(
+  //     userId,
+  //     predictionId,
+  //   );
+  //   return { predictions };
+  // }
 }

@@ -26,6 +26,9 @@ export class MatchService {
   async findAll(): Promise<Match[]> {
     return this.matchModel.find().exec();
   }
+  async findAllByDate(matchDate: Date): Promise<Match[]> {
+    return this.matchModel.find({ matchDate }).exec();
+  }
 
   async updateMatch(
     matchId: string,

@@ -14,11 +14,18 @@ import { CreatePrediction } from './dto';
 export class PredictionService {
   constructor(
     @InjectModel('Prediction')
-    private readonly PredictionModel: Model<PredictionDocument>, // @InjectModel('Match') private readonly matchModel: Model<MatchDocument>, // private readonly userService: UserService,
+    private readonly PredictionModel: Model<PredictionDocument>,
+    @InjectModel('Match') private readonly matchModel: Model<MatchDocument>, // private readonly userService: UserService,
   ) {}
 
   async createPrediction(dto: CreatePrediction) {
-    // const match = await this.matchModel.findById({ id: dto.matchId });
+    const match = await this.matchModel.findById({ id: dto.matchId });
+    const result = this.isWithin5MinutesFromSetTime(match.matchDate);
+    if (result) {
+      throw new BadRequestException(
+        'Can not predict within 5 minutes to match start',
+      );
+    }
     if (dto.predictedWinner !== 'DRAW' && dto.winnerScore <= dto.loserScore) {
       throw new BadRequestException(
         'winner score has to be greater than loser score',
@@ -57,5 +64,22 @@ export class PredictionService {
     }
 
     return { predictionLength: predictions.length, predictions };
+  }
+
+  private isWithin5MinutesFromSetTime(setTime) {
+    // Convert setTime to milliseconds
+    const setTimeMs = new Date(setTime).getTime();
+
+    // Get the current time in milliseconds
+    const currentTimeMs = new Date().getTime();
+
+    // Calculate the difference in milliseconds
+    const differenceMs = currentTimeMs - setTimeMs;
+
+    // Convert milliseconds to minutes
+    const differenceMinutes = Math.abs(differenceMs / (1000 * 60));
+
+    // Check if the difference is less than or equal to 5 minutes
+    return differenceMinutes <= 5;
   }
 }

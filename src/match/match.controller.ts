@@ -1,5 +1,13 @@
 // src/match/match.controller.ts
-import { Controller, Post, Body, Param, Patch, Get } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Param,
+  Patch,
+  Get,
+  Query,
+} from '@nestjs/common';
 import { MatchService } from './match.service';
 import { CreateMatchDto, UpdateMatchDto } from './dto';
 import { Match } from './match.schema';
@@ -25,6 +33,11 @@ export class MatchController {
   @Get()
   async getAllMatches() {
     const matches = await this.matchService.findAll();
+    return matches;
+  }
+  @Get('/match-date')
+  async getAllMatchesByDate(@Query('matchDate') matchDate?: Date) {
+    const matches = await this.matchService.findAllByDate(matchDate);
     return matches;
   }
 
