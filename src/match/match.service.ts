@@ -27,7 +27,13 @@ export class MatchService {
     return this.matchModel.find().exec();
   }
   async findAllByDate(matchDate: Date): Promise<Match[]> {
-    return this.matchModel.find({ matchDate }).exec();
+    const startDate = new Date(matchDate);
+    const endDate = new Date(matchDate)
+    endDate.setDate(startDate.getDate() + 1);
+
+    return this.matchModel.find(
+      { matchDate: { $gte: startDate, $lt: endDate } }
+    ).exec();
   }
 
   async updateMatch(
