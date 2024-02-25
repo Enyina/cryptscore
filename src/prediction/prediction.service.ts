@@ -9,6 +9,7 @@ import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { MatchDocument } from 'src/match/match.schema';
 import { CreatePrediction } from './dto';
+import mongoose from 'mongoose';
 
 @Injectable()
 export class PredictionService {
@@ -16,24 +17,27 @@ export class PredictionService {
     @InjectModel('Prediction')
     private readonly PredictionModel: Model<PredictionDocument>,
     @InjectModel('Match') private readonly matchModel: Model<MatchDocument>, // private readonly userService: UserService,
-  ) {}
+  ) { }
 
   async createPrediction(dto: CreatePrediction) {
-    const match = await this.matchModel.findById({ id: dto.matchId });
+    const match = await this.matchModel.findById(dto.matchId);
+
+    const prediction = await this.PredictionModel.findOne({
+      user: dto.userId,
+      match: dto.matchId,
+    }).exec();
+
     const result = this.isWithin5MinutesFromSetTime(match.matchDate);
     if (result) {
       throw new BadRequestException(
         'Can not predict within 5 minutes to match start',
       );
     }
-    if (dto.predictedWinner !== 'DRAW' && dto.winnerScore <= dto.loserScore) {
-      throw new BadRequestException(
-        'winner score has to be greater than loser score',
-      );
-    }
+
     if (dto.predictedWinner === 'DRAW' && dto.winnerScore !== dto.loserScore) {
       throw new BadRequestException('score has to be equal');
     }
+
     let teamAScore;
     let teamBScore;
     if (dto.predictedWinner === 'TEAM_A') {
@@ -43,15 +47,21 @@ export class PredictionService {
       teamBScore = dto.winnerScore;
       teamAScore = dto.loserScore;
     }
-    const createdPrediction = new this.PredictionModel({
-      predictedWinner: dto.predictedWinner,
-      teamAScore,
-      teamBScore,
-      user: dto.userId,
-      group: dto.groupId,
-      match: dto.matchId,
-    });
-    return createdPrediction.save();
+    if (!prediction) {
+      const createdPrediction = new this.PredictionModel({
+        predictedWinner: dto.predictedWinner,
+        teamAScore,
+        teamBScore,
+        user: dto.userId,
+        match: dto.matchId,
+      });
+      return createdPrediction.save();
+    } else {
+      prediction.predictedWinner = dto.predictedWinner;
+      prediction.teamAScore = teamAScore;
+      prediction.teamBScore = teamBScore;
+      return prediction.save();
+    }
   }
 
   async getUserPredictedMatches(userId: string) {
@@ -66,18 +76,60 @@ export class PredictionService {
     return { predictionLength: predictions.length, predictions };
   }
 
-  private isWithin5MinutesFromSetTime(setTime) {
+  async getUserPredictionsByMatchDate(userId: string, matchDate: Date) {
+    const startDate = new Date(matchDate);
+    const endDate = new Date(matchDate)
+    endDate.setDate(startDate.getDate() + 1);
+
+    const predictions = await this.PredictionModel.aggregate([
+      {
+        $lookup: {
+          from: 'matches',
+          localField: 'match',
+          foreignField: '_id',
+          as: 'match_unwind',
+        },
+      },
+      {
+        $unwind: {
+          path: "$match_unwind"
+        }
+      },
+      {
+        $match: {
+          user: new mongoose.Types.ObjectId(userId),
+          'match_unwind.matchDate': {
+            $gte: startDate,
+            $lt: endDate
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          match: 1,
+          predictedWinner: 1,
+          teamAScore: 1,
+          teamBScore: 1,
+        },
+      }
+    ]);
+
+    return predictions;
+  }
+
+  private isWithin5MinutesFromSetTime(_setTime) {
     // Convert setTime to milliseconds
-    const setTimeMs = new Date(setTime).getTime();
+    const setTime = new Date(_setTime);
 
     // Get the current time in milliseconds
-    const currentTimeMs = new Date().getTime();
+    const currentTime = new Date();
 
     // Calculate the difference in milliseconds
-    const differenceMs = currentTimeMs - setTimeMs;
+    const differenceMs = Number(setTime) - Number(currentTime);
 
     // Convert milliseconds to minutes
-    const differenceMinutes = Math.abs(differenceMs / (1000 * 60));
+    const differenceMinutes = differenceMs / (1000 * 60);
 
     // Check if the difference is less than or equal to 5 minutes
     return differenceMinutes <= 5;

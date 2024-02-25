@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { JwtGuard } from 'src/auth/guard';
 import { PredictionService } from './prediction.service';
 import { CreatePrediction } from './dto';
@@ -20,6 +20,16 @@ export class PredictionController {
     );
     return { predictions };
   }
+
+  @Get(':id/by-date')
+  async getUserPredictedMatches(@Param('id') userId: string,
+      @Query('matchDate') matchDate?: Date) {
+    const predictions = await this.predictionService.getUserPredictionsByMatchDate(
+      userId, matchDate
+    );
+    return { predictions };
+  }
+
   // @Get('/:userId/user-predictions/:predictionId')
   // async getUserPredictedMatchesCount(
   //   @Param('userId') userId: string,
