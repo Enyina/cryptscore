@@ -23,9 +23,10 @@ export class PredictionController {
 
   @Get(':id/by-date')
   async getUserPredictedMatches(@Param('id') userId: string,
-      @Query('matchDate') matchDate?: Date) {
+      @Query('matchDate') matchDate?: Date,
+      @Query('populateMatch') populateMatch?: boolean) {
     const predictions = await this.predictionService.getUserPredictionsByMatchDate(
-      userId, matchDate
+      userId, matchDate, populateMatch
     );
     return { predictions };
   }
