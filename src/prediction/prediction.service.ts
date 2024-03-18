@@ -7,7 +7,7 @@ import { UserService } from 'src/user/user.service';
 import { PredictionDocument } from './prediction.schema';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { MatchDocument } from 'src/match/match.schema';
+import { Match, MatchDocument } from 'src/match/match.schema';
 import { CreatePrediction } from './dto';
 import mongoose from 'mongoose';
 
@@ -16,7 +16,8 @@ export class PredictionService {
   constructor(
     @InjectModel('Prediction')
     private readonly PredictionModel: Model<PredictionDocument>,
-    @InjectModel('Match') private readonly matchModel: Model<MatchDocument>, // private readonly userService: UserService,
+    @InjectModel('Match') private readonly matchModel: Model<MatchDocument>,
+    private readonly userService: UserService,
   ) { }
 
   async createPrediction(dto: CreatePrediction) {
@@ -76,7 +77,8 @@ export class PredictionService {
     return { predictionLength: predictions.length, predictions };
   }
 
-  async getUserPredictionsByMatchDate(userId: string, matchDate: Date) {
+  async getUserPredictionsByMatchDate(userId: string, matchDate: Date,
+     populateMatch : boolean=false) {
     const startDate = new Date(matchDate);
     const endDate = new Date(matchDate)
     endDate.setDate(startDate.getDate() + 1);
@@ -111,11 +113,33 @@ export class PredictionService {
           predictedWinner: 1,
           teamAScore: 1,
           teamBScore: 1,
+          ...(populateMatch && {
+            matchDate: '$match_unwind.matchDate',
+            matchOutcome: '$match_unwind.matchOutcome',
+            teamA: '$match_unwind.teamA',
+            teamB: '$match_unwind.teamB',
+          })
         },
       }
     ]);
 
     return predictions;
+  }
+
+  async scoreUserPredictions(match : MatchDocument) {
+    const predictions = await this.PredictionModel.find({
+      match : new mongoose.Types.ObjectId(match._id)
+    });
+    
+    for (const prediction of predictions) {
+      if (prediction.predictedWinner === match.matchOutcome.winner ||
+          prediction.teamAScore === match.matchOutcome.teamAScore &&
+          prediction.teamBScore === match.matchOutcome.teamBScore) {
+            
+          }
+
+    }
+    
   }
 
   private isWithin5MinutesFromSetTime(_setTime) {
