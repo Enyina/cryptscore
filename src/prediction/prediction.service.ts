@@ -9,6 +9,10 @@ import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { MatchDocument } from 'src/match/match.schema';
 import { CreatePrediction } from './dto';
+import {
+  NotificationDocument,
+  NotificationType,
+} from 'src/notification/notification.schema';
 
 @Injectable()
 export class PredictionService {
@@ -16,6 +20,8 @@ export class PredictionService {
     @InjectModel('Prediction')
     private readonly PredictionModel: Model<PredictionDocument>,
     @InjectModel('Match') private readonly matchModel: Model<MatchDocument>, // private readonly userService: UserService,
+    @InjectModel(Notification.name)
+    private notification: Model<NotificationDocument>,
   ) {}
 
   async createPrediction(dto: CreatePrediction) {
@@ -50,6 +56,13 @@ export class PredictionService {
       user: dto.userId,
       group: dto.groupId,
       match: dto.matchId,
+    });
+    await this.notification.create({
+      title: 'Create Prediction',
+      content: ` ${dto.userId} made a prediction .`,
+      type: NotificationType.PREDICTION_MADE,
+      user: dto.userId,
+      group: dto.groupId,
     });
     return createdPrediction.save();
   }
