@@ -14,7 +14,7 @@ export class GroupService {
   constructor(
     @InjectModel(Group.name) private groupModel: Model<GroupDocument>,
     @InjectModel(Invite.name) private invite: Model<InviteDocument>,
-    @InjectModel(Notification.name)
+    @InjectModel('Notification')
     private notification: Model<NotificationDocument>,
   ) {}
 
