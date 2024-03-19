@@ -4,12 +4,18 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateGroupDto } from './dto';
 import { Invite, InviteDocument } from './invite.schema ';
+import {
+  NotificationDocument,
+  NotificationType,
+} from 'src/notification/notification.schema';
 
 @Injectable()
 export class GroupService {
   constructor(
     @InjectModel(Group.name) private groupModel: Model<GroupDocument>,
     @InjectModel(Invite.name) private invite: Model<InviteDocument>,
+    @InjectModel(Notification.name)
+    private notification: Model<NotificationDocument>,
   ) {}
 
   async createGroup(userId, dto: CreateGroupDto): Promise<Group> {
@@ -77,6 +83,14 @@ export class GroupService {
         });
         return 'Invite sent successfully';
       }
+
+      await this.notification.create({
+        title: 'Join Request',
+        content: `${userId} has requested to join ${group.name}.`,
+        type: NotificationType.JOIN_REQUEST,
+        user: userId,
+        group: group._id,
+      });
       return await this.groupModel.findByIdAndUpdate(
         groupId,
         { $addToSet: { members: userId } },
@@ -102,12 +116,22 @@ export class GroupService {
   async acceptInvites(inviteId: string) {
     try {
       const invite = await this.invite.findById({ id: inviteId });
-      await this.invite.deleteOne({ id: inviteId });
-      return await this.groupModel.findByIdAndUpdate(
+
+      const group = await this.groupModel.findByIdAndUpdate(
         invite.reciever,
         { $addToSet: { members: invite.sender } },
         { new: true },
       );
+
+      await this.notification.create({
+        title: 'JOIN ACCEPTED',
+        content: `Requested to join ${group.name} accepted.`,
+        type: NotificationType.JOIN_ACCEPTED,
+        user: invite.sender,
+        group: group._id,
+      });
+      await this.invite.deleteOne({ id: inviteId });
+      return group;
     } catch (error) {
       console.log(error);
     }
@@ -115,6 +139,16 @@ export class GroupService {
 
   async rejectInvites(inviteId: string) {
     try {
+      const invite = await this.invite.findById({ id: inviteId });
+
+      const group = await this.groupModel.findById(invite.reciever);
+      await this.notification.create({
+        title: 'JOIN ACCEPTED',
+        content: `Requested to join ${group.name} rejected.`,
+        type: NotificationType.JOIN_REJECTED,
+        user: invite.sender,
+        group: group._id,
+      });
       await this.invite.deleteOne({ id: inviteId });
       return 'invite rejected';
     } catch (error) {
@@ -124,11 +158,19 @@ export class GroupService {
 
   async leaveGroup(groupId: string, userId: string): Promise<Group> {
     try {
-      return await this.groupModel.findByIdAndUpdate(
+      const group = await this.groupModel.findByIdAndUpdate(
         groupId,
         { $pull: { members: userId } },
         { new: true },
       );
+      await this.notification.create({
+        title: 'JOIN ACCEPTED',
+        content: `${userId} left the Group.`,
+        type: NotificationType.Left_Group,
+        user: userId,
+        group: group._id,
+      });
+      return group;
     } catch (error) {
       console.log('Error leaving group:', error.message);
       throw new Error('Failed to leave group');
