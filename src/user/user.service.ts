@@ -131,9 +131,11 @@ export class UserService {
   }
 
   async getUsersByPoints(page: number, pageSize: number) {
-    const usersList = await this.User.find({});
-    // .skip((page - 1) * pageSize)
-    // .limit(pageSize)
+    const usersList = await this.User.find({ role : 'user'})
+    .select('name points')
+    .sort({ points : -1})
+    .skip((page - 1) * pageSize)
+    .limit(pageSize);
 
     return usersList;
   }

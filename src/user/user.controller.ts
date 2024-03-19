@@ -20,6 +20,15 @@ import { Roles } from 'src/auth/decorator';
 @UseGuards(JwtGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
+  
+  @Get('/leaderboard')
+  async getUsersByPoints(
+    @Query('page') page = 1,
+    @Query('pageSize') pageSize = 10,
+  ) {
+    const usersList = await this.userService.getUsersByPoints(page, pageSize);
+    return { success: true, data: usersList };
+  }
 
   @Put('/:id')
   async updateUser(@Param('id') id: string, @Body() dto: updateUserDto) {
@@ -80,12 +89,4 @@ export class UserController {
     return this.userService.getUserPoints(userId);
   }
 
-  @Get('/prediction-board')
-  async getUsersByPoints(
-    @Query('page') page = 1,
-    @Query('pageSize') pageSize = 10,
-  ) {
-    const usersList = await this.userService.getUsersByPoints(page, pageSize);
-    return { success: true, data: usersList };
-  }
 }

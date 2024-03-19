@@ -6,12 +6,14 @@ import { Match, MatchDocument } from './match.schema';
 import { CreateMatchDto, UpdateMatchDto } from './dto';
 import { Prediction } from 'src/prediction/prediction.schema';
 import { UserService } from '../user/user.service';
+import { PredictionService } from 'src/prediction/prediction.service';
 
 @Injectable()
 export class MatchService {
   constructor(
     @InjectModel('Match') private readonly matchModel: Model<MatchDocument>,
     private readonly userService: UserService,
+    private readonly predictionService : PredictionService
   ) {}
 
   async createMatch(createMatchDto: CreateMatchDto): Promise<Match> {
@@ -27,7 +29,13 @@ export class MatchService {
     return this.matchModel.find().exec();
   }
   async findAllByDate(matchDate: Date): Promise<Match[]> {
-    return this.matchModel.find({ matchDate }).exec();
+    const startDate = new Date(matchDate);
+    const endDate = new Date(matchDate)
+    endDate.setDate(startDate.getDate() + 1);
+
+    return this.matchModel.find(
+      { matchDate: { $gte: startDate, $lt: endDate } }
+    ).exec();
   }
 
   async updateMatch(

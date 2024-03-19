@@ -21,15 +21,7 @@ export class MatchController {
     return this.matchService.createMatch(createMatchDto);
   }
 
-  @Get(':id')
-  async getMatchById(@Param('id') id: string) {
-    const match = await this.matchService.findById(id);
-    if (!match) {
-      return { message: 'Match not found' };
-    }
-    return match;
-  }
-
+  
   @Get()
   async getAllMatches() {
     const matches = await this.matchService.findAll();
@@ -40,7 +32,16 @@ export class MatchController {
     const matches = await this.matchService.findAllByDate(matchDate);
     return matches;
   }
-
+  
+  @Get(':id')
+  async getMatchById(@Param('id') id: string) {
+    const match = await this.matchService.findById(id);
+    if (!match) {
+      return { message: 'Match not found' };
+    }
+    return match;
+  }
+  
   @Patch(':id')
   async updateMatch(
     @Param('id') matchId: string,
