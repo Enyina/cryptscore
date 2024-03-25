@@ -4,6 +4,7 @@ import { PredictionService } from './prediction.service';
 import { PredictionSchema } from './prediction.schema';
 import { MatchSchema } from 'src/match/match.schema';
 import { MongooseModule } from '@nestjs/mongoose';
+import { NotificationSchema } from 'src/notification/notification.schema';
 import { UserService } from 'src/user/user.service';
 import { UserSchema } from 'src/user/user.schema';
 
@@ -12,7 +13,8 @@ import { UserSchema } from 'src/user/user.schema';
     MongooseModule.forFeature([
       { name: 'Prediction', schema: PredictionSchema },
       { name: 'Match', schema: MatchSchema },
-      { name: 'User', schema: UserSchema}
+      { name: 'User', schema: UserSchema },
+      { name: 'Notification', schema: NotificationSchema },
     ]),
   ],
   controllers: [PredictionController],

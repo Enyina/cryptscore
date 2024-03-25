@@ -5,11 +5,14 @@ import {
 } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import { PredictionDocument } from './prediction.schema';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Match, MatchDocument } from 'src/match/match.schema';
 import { CreatePrediction } from './dto';
-import mongoose from 'mongoose';
+import {
+  NotificationDocument,
+  NotificationType,
+} from 'src/notification/notification.schema';
 
 @Injectable()
 export class PredictionService {
@@ -17,8 +20,10 @@ export class PredictionService {
     @InjectModel('Prediction')
     private readonly PredictionModel: Model<PredictionDocument>,
     @InjectModel('Match') private readonly matchModel: Model<MatchDocument>,
+    @InjectModel('Notification')
+    private readonly notification: Model<NotificationDocument>,
     private readonly userService: UserService,
-  ) { }
+  ) {}
 
   async createPrediction(dto: CreatePrediction) {
     const match = await this.matchModel.findById(dto.matchId);
@@ -61,6 +66,13 @@ export class PredictionService {
       prediction.predictedWinner = dto.predictedWinner;
       prediction.teamAScore = teamAScore;
       prediction.teamBScore = teamBScore;
+      await this.notification.create({
+        title: 'Create Prediction',
+        content: ` ${dto.userId} made a prediction .`,
+        type: NotificationType.PREDICTION_MADE,
+        user: dto.userId,
+        group: dto.groupId,
+      });
       return prediction.save();
     }
   }
@@ -77,10 +89,13 @@ export class PredictionService {
     return { predictionLength: predictions.length, predictions };
   }
 
-  async getUserPredictionsByMatchDate(userId: string, matchDate: Date,
-     populateMatch : boolean=false) {
+  async getUserPredictionsByMatchDate(
+    userId: string,
+    matchDate: Date,
+    populateMatch = false,
+  ) {
     const startDate = new Date(matchDate);
-    const endDate = new Date(matchDate)
+    const endDate = new Date(matchDate);
     endDate.setDate(startDate.getDate() + 1);
 
     const predictions = await this.PredictionModel.aggregate([
@@ -94,15 +109,15 @@ export class PredictionService {
       },
       {
         $unwind: {
-          path: "$match_unwind"
-        }
+          path: '$match_unwind',
+        },
       },
       {
         $match: {
           user: new mongoose.Types.ObjectId(userId),
           'match_unwind.matchDate': {
             $gte: startDate,
-            $lt: endDate
+            $lt: endDate,
           },
         },
       },
@@ -118,28 +133,27 @@ export class PredictionService {
             matchOutcome: '$match_unwind.matchOutcome',
             teamA: '$match_unwind.teamA',
             teamB: '$match_unwind.teamB',
-          })
+          }),
         },
-      }
+      },
     ]);
 
     return predictions;
   }
 
-  async scoreUserPredictions(match : MatchDocument) {
+  async scoreUserPredictions(match: MatchDocument) {
     const predictions = await this.PredictionModel.find({
-      match : new mongoose.Types.ObjectId(match._id)
+      match: new mongoose.Types.ObjectId(match._id),
     });
-    
-    for (const prediction of predictions) {
-      if (prediction.predictedWinner === match.matchOutcome.winner ||
-          prediction.teamAScore === match.matchOutcome.teamAScore &&
-          prediction.teamBScore === match.matchOutcome.teamBScore) {
-            
-          }
 
+    for (const prediction of predictions) {
+      if (
+        prediction.predictedWinner === match.matchOutcome.winner ||
+        (prediction.teamAScore === match.matchOutcome.teamAScore &&
+          prediction.teamBScore === match.matchOutcome.teamBScore)
+      ) {
+      }
     }
-    
   }
 
   private isWithin5MinutesFromSetTime(_setTime) {
