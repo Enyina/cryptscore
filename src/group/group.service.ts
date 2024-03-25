@@ -10,7 +10,7 @@ export class GroupService {
   constructor(
     @InjectModel(Group.name) private groupModel: Model<GroupDocument>,
     @InjectModel(Invite.name) private invite: Model<InviteDocument>,
-  ) {}
+  ) { }
 
   async createGroup(userId, dto: CreateGroupDto): Promise<Group> {
     try {
@@ -43,10 +43,15 @@ export class GroupService {
       console.log(error);
     }
   }
-  async getGroupUsers(groupId) {
+  async getGroupUsers(groupId: string) {
     try {
-      const users = await this.groupModel.findById(groupId);
-      return users.members;
+      const groups = await this.groupModel.findById(groupId)
+        .select('name members isPublic')
+        .populate({
+          path: 'members',
+          select: 'name points',
+        });
+      return groups;
     } catch (error) {
       console.log(error);
     }
@@ -135,17 +140,31 @@ export class GroupService {
     }
   }
 
-  async getTopGroupsByTotalPoints(): Promise<Group[]> {
+  async getTopGroupsByTotalPoints(
+    page: number,
+    pageSize: number,
+  ): Promise<Group[]> {
     const groupsList = await this.groupModel
       .aggregate([
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'members',
+            foreignField: '_id',
+            as: 'members',
+          }
+        },
         {
           $project: {
             name: 1,
             totalPoints: { $sum: '$members.points' },
+            isPublic: 1,
+            membersCount: { $size: '$members' }
           },
         },
         { $sort: { totalPoints: -1 } },
-        { $limit: 10 },
+        { $limit: pageSize },
+        { $skip: (page - 1) * pageSize }
       ])
       .exec();
 

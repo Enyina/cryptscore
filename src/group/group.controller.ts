@@ -7,6 +7,7 @@ import {
   Post,
   Put,
   UseGuards,
+  Query
 } from '@nestjs/common';
 import { GetUser, Roles } from 'src/auth/decorator';
 import { GroupService } from './group.service';
@@ -35,11 +36,22 @@ export class GroupController {
     return group;
   }
 
+  @Get('prediction-board')
+  async getTopGroupsByTotalPoints(
+    @Query('page') page : string = '1',
+    @Query('pageSize') pageSize : string = '10',
+  ) {
+    const groupsList = await this.groupService.getTopGroupsByTotalPoints(
+      parseInt(page), parseInt(pageSize)
+    );
+    return { success: true, data: groupsList };
+  }
+
   @Get('/:groupId/users')
   async getAllGroupUsers(@Param() dto: { groupId: string }) {
     const group = await this.groupService.getGroupUsers(dto.groupId);
 
-    return group;
+    return {success : true, data : group};
   }
   @Get('/:groupId')
   async getGroup(@Param() dto: { groupId: string }) {
@@ -84,9 +96,5 @@ export class GroupController {
     return this.groupService.getAllUserGroups(param.userId);
   }
 
-  @Get('prediction-board')
-  async getTopGroupsByTotalPoints() {
-    const groupsList = await this.groupService.getTopGroupsByTotalPoints();
-    return { success: true, data: groupsList };
-  }
+
 }

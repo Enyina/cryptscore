@@ -56,7 +56,6 @@ export class AuthService {
 
   async signToken(userId) {
     const secret = this.congif.get('JWT_SECRET');
-    console.log('signing token:', secret);
 
     return await this.jwt.sign(
       { userId },
