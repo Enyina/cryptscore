@@ -12,6 +12,8 @@ import { MatchModule } from './match/match.module';
 // import { MatchNoSpecController } from './match--no-spec/match--no-spec.controller';
 import { AdminModule } from './admin/admin.module';
 import { NotificationModule } from './notification/notification.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { CronModule } from './cron/cron.module';
 
 @Module({
   imports: [
@@ -29,6 +31,8 @@ import { NotificationModule } from './notification/notification.module';
     MatchModule,
     AdminModule,
     NotificationModule,
+    ScheduleModule.forRoot(),
+    CronModule
     // DataBaseModule,
   ],
   controllers: [AppController],

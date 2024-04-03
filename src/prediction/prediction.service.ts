@@ -13,6 +13,7 @@ import {
   NotificationDocument,
   NotificationType,
 } from 'src/notification/notification.schema';
+import { UpdateMatchDto } from 'src/match/dto';
 
 @Injectable()
 export class PredictionService {
@@ -23,7 +24,7 @@ export class PredictionService {
     @InjectModel('Notification')
     private readonly notification: Model<NotificationDocument>,
     private readonly userService: UserService,
-  ) {}
+  ) { }
 
   async createPrediction(dto: CreatePrediction) {
     const match = await this.matchModel.findById(dto.matchId);
@@ -171,5 +172,24 @@ export class PredictionService {
 
     // Check if the difference is less than or equal to 5 minutes
     return differenceMinutes <= 5;
+  }
+
+  async updatePredictions(matchId: string, updateMatchDto: UpdateMatchDto) {
+    const predictions = await this.PredictionModel
+      .find({ match: new mongoose.Types.ObjectId(matchId) });
+    for (const prediction of predictions) {
+      let score = 0
+      if (prediction.predictedWinner.toLocaleLowerCase()
+        === updateMatchDto.matchResult.toLocaleLowerCase()) {
+        score += 3
+      }
+      if ((prediction.teamAScore === updateMatchDto.teamAScore &&
+        prediction.teamBScore === updateMatchDto.teamBScore)
+      ) {
+        score += 5
+      }
+      score && await this.userService
+        .updatePointsOnCorrectPrediction(prediction.user._id, score);
+    }
   }
 }
