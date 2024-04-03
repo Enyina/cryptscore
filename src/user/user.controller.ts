@@ -75,12 +75,12 @@ export class UserController {
     return { predictions };
   }
 
-  @Post(':id/predicted-matches/correct')
-  async updatePointsOnCorrectPrediction(
-    @Param('id') userId: string,
-  ): Promise<void> {
-    await this.userService.updatePointsOnCorrectPrediction(userId);
-  }
+  // @Post(':id/predicted-matches/correct')
+  // async updatePointsOnCorrectPrediction(
+  //   @Param('id') userId: string,
+  // ): Promise<void> {
+  //   await this.userService.updatePointsOnCorrectPrediction(userId);
+  // }
 
   @Get(':id/points')
   async getUserPoints(

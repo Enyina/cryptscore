@@ -38,6 +38,22 @@ export class MatchService {
     ).exec();
   }
 
+  async getMatchesWithinTwoHours(): Promise<Match[]> {
+    const currentDate = new Date();
+    const twoHoursEarlier = new Date();
+    twoHoursEarlier.setHours(currentDate.getHours() - 2);
+
+
+
+    return this.matchModel.find({
+      matchDate: {
+        $gte: twoHoursEarlier,
+        $lte: currentDate,
+      },
+      matchStatus : { $ne: 'Full-time' }
+    });
+  }
+
   async updateMatch(
     matchId: string,
     updateMatchDto: UpdateMatchDto,
@@ -51,6 +67,7 @@ export class MatchService {
             teamAScore: updateMatchDto.teamAScore,
             teamBScore: updateMatchDto.teamBScore,
           },
+          matchStatus: updateMatchDto.status || 'Pending'
         },
       },
       { new: true },
@@ -63,50 +80,50 @@ export class MatchService {
     return existingMatch;
   }
 
-  async updateMatchOutcome(
-    matchId: string,
-    updateMatchDto: UpdateMatchDto,
-  ): Promise<void> {
-    const match = await this.matchModel.findByIdAndUpdate(
-      matchId,
-      {
-        matchOutcome: {
-          winner: updateMatchDto.matchResult,
-          teamAScore: updateMatchDto.teamAScore,
-          teamBScore: updateMatchDto.teamBScore,
-        },
-      },
-      { new: true },
-    );
+  // async updateMatchOutcome(
+  //   matchId: string,
+  //   updateMatchDto: UpdateMatchDto,
+  // ): Promise<void> {
+  //   const match = await this.matchModel.findByIdAndUpdate(
+  //     matchId,
+  //     {
+  //       matchOutcome: {
+  //         winner: updateMatchDto.matchResult,
+  //         teamAScore: updateMatchDto.teamAScore,
+  //         teamBScore: updateMatchDto.teamBScore,
+  //       },
+  //     },
+  //     { new: true },
+  //   );
 
-    if (!match) {
-      throw new NotFoundException('Match not found');
-    }
+  //   if (!match) {
+  //     throw new NotFoundException('Match not found');
+  //   }
 
-    // Check if the match has predictions
-    if (!match.matchPredictions || match.matchPredictions.length === 0) {
-      return; // No predictions, nothing to update
-    }
+  //   // Check if the match has predictions
+  //   if (!match.matchPredictions || match.matchPredictions.length === 0) {
+  //     return; // No predictions, nothing to update
+  //   }
 
-    // Assuming you have an array of user predictions in the match schema
-    for (const prediction of match.matchPredictions as Prediction[]) {
-      // Check if the user's prediction is correct
-      const isPredictionCorrect =
-        (updateMatchDto.matchResult === 'TEAM_A' &&
-          prediction.predictedWinner === 'TEAM_A' &&
-          updateMatchDto.teamAScore > updateMatchDto.teamBScore) ||
-        (updateMatchDto.matchResult === 'TEAM_B' &&
-          prediction.predictedWinner === 'TEAM_B' &&
-          updateMatchDto.teamBScore > updateMatchDto.teamAScore) ||
-        (updateMatchDto.matchResult === 'Draw' &&
-          prediction.predictedWinner === 'Draw' &&
-          updateMatchDto.teamAScore === updateMatchDto.teamBScore);
+  //   // Assuming you have an array of user predictions in the match schema
+  //   for (const prediction of match.matchPredictions as Prediction[]) {
+  //     // Check if the user's prediction is correct
+  //     const isPredictionCorrect =
+  //       (updateMatchDto.matchResult === 'TEAM_A' &&
+  //         prediction.predictedWinner === 'TEAM_A' &&
+  //         updateMatchDto.teamAScore > updateMatchDto.teamBScore) ||
+  //       (updateMatchDto.matchResult === 'TEAM_B' &&
+  //         prediction.predictedWinner === 'TEAM_B' &&
+  //         updateMatchDto.teamBScore > updateMatchDto.teamAScore) ||
+  //       (updateMatchDto.matchResult === 'Draw' &&
+  //         prediction.predictedWinner === 'Draw' &&
+  //         updateMatchDto.teamAScore === updateMatchDto.teamBScore);
 
-      if (isPredictionCorrect) {
-        await this.userService.updatePointsOnCorrectPrediction(
-          prediction.user.id,
-        );
-      }
-    }
-  }
+  //     if (isPredictionCorrect) {
+  //       await this.userService.updatePointsOnCorrectPrediction(
+  //         prediction.user.id,
+  //       );
+  //     }
+  //   }
+  // }
 }

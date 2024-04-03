@@ -109,14 +109,14 @@ export class UserService {
     return user.predictions;
   }
 
-  async updatePointsOnCorrectPrediction(userId: string): Promise<void> {
+  async updatePointsOnCorrectPrediction(userId: string, score : number): Promise<void> {
     const user = await this.User.findById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
     // Assuming you have a field named 'points' in your user schema
-    user.points = (user.points || 0) + 1;
+    user.points = (user.points || 0) + score;
 
     await user.save();
   }

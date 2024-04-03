@@ -8,4 +8,5 @@ export class UpdateMatchDto {
   teamAScore: number;
   teamBScore: number;
   matchResult: 'TEAM_A' | 'TEAM_B' | 'Draw';
+  status?: string;
 }
