@@ -30,9 +30,11 @@ export class CronService {
                 // NOTE: THE SELECTORS CAN CHANGE, PLEASE CHECK THE SELECTORS ON THE PAGE UPON ERROR
                 await page.waitForSelector('.imso_mh__r-tm-sc.imso_mh__scr-it.imso-light-font', { timeout: 5_000 });
                 const score_detail = await page.evaluate(() => {
-                    const teamAScore = document.querySelector('.imso_mh__l-tm-sc.imso_mh__scr-it.imso-light-font').textContent;
-                    const teamBScore = document.querySelector('.imso_mh__r-tm-sc.imso_mh__scr-it.imso-light-font').textContent;
-                    const time_detail = document.querySelector(".imso_mh__ft-mtch.imso-medium-font.imso_mh__ft-mtchc").textContent;
+                    const teamAScore = document.querySelector('.imso_mh__l-tm-sc.imso_mh__scr-it.imso-light-font')?.textContent;
+                    const teamBScore = document.querySelector('.imso_mh__r-tm-sc.imso_mh__scr-it.imso-light-font')?.textContent;
+                    const time_detail = document.querySelector(".imso_mh__ft-mtch.imso-medium-font.imso_mh__ft-mtchc")?.textContent
+                     || document.querySelector(".liveresults-sports-immersive__game-minute").childNodes[0].textContent;
+                    console.log({ teamAScore, teamBScore, time_detail })
                     return {
                         teamAScore: parseInt(teamAScore),
                         teamBScore: parseInt(teamBScore),
